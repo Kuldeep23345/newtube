@@ -5,11 +5,11 @@ import { PersonalSection } from "./personal-section";
 
 export const HomeSidebar = () => {
   return (
-    <Sidebar className="pt-16 z-40 border-none">
+    <Sidebar className="pt-16 z-40 border-none" collapsible="icon">
       <SidebarContent className="bg-background">
         <MainSection />
-        <Separator/>
-        <PersonalSection/>
+        <Separator />
+        <PersonalSection />
       </SidebarContent>
     </Sidebar>
   );
