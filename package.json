@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dev:all": "concurrently \"bun run dev\" \"bun run dev:webhook\"",
+    "dev:webhook": "ngrok http --url=airily-unpillared-brigette.ngrok-free.dev 3000",
+    "dev:studio": "drizzle-kit studio",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -31,6 +34,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "concurrently": "^9.2.1",
     "drizzle-kit": "^0.31.8",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
