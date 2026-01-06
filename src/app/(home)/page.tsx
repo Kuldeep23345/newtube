@@ -1,7 +1,17 @@
-import { trpc } from "@/trpc/server";
+import { HomeView } from "@/modules/home/ui/views/home-view";
+import { HydrateClient, trpc } from "@/trpc/server";
+export const dynamic = "force-dynamic";
 
-export default async function page() {
-  const data = await trpc.hello({ text: "world" });
+interface PageProps {
+  searchParams: Promise<{ categoryId?: string }>;
+}
 
-  return <div>{data?.greeting}</div>;
+export default async function Page({ searchParams }: PageProps) {
+  const {categoryId} = await searchParams;
+  void trpc.categories.getMany.prefetch();
+  return (
+    <HydrateClient>
+      <HomeView categoryId={categoryId} />
+    </HydrateClient>
+  );
 }
