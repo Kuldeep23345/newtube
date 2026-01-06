@@ -13,6 +13,9 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.5",
+    "@mux/mux-node": "^12.8.1",
+    "@mux/mux-uploader": "^1.4.1",
+    "@mux/mux-uploader-react": "^1.4.1",
     "@neondatabase/serverless": "^1.0.2",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.15",
