@@ -50,6 +50,7 @@ import { snakeCaseToTitle } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { THUMBNAIL_FALLBACK } from "@/modules/videos/constants";
+import { ThumbnailUploadModal } from "../components/thumbnail-upload-modal";
 
 interface FormSectionProps {
   videoId: string;
@@ -119,7 +120,16 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     }, 2000);
   };
 
+  const [thumbnailUploadModalOpen, setThumbnailUploadModalOpen] = useState(false);
+
   return (
+    <>
+    <ThumbnailUploadModal
+    videoId={videoId}
+    open={thumbnailUploadModalOpen}
+    onOpenChange={setThumbnailUploadModalOpen}
+    />
+    
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex items-center justify-between mb-6">
@@ -210,7 +220,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" side="right">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={()=>setThumbnailUploadModalOpen(true)}>
                             <ImagePlusIcon className="size-4" />
                             Change
                           </DropdownMenuItem>
@@ -345,5 +355,6 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
         </div>
       </form>
     </Form>
+    </>
   );
 };
