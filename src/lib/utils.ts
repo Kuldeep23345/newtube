@@ -14,5 +14,9 @@ export const formatDuration = (duration: number) => {
     .padStart(2, "0")}`;
 };
 
+export const snakeCaseToTitle = (str: string) => {
+  return str.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
 
     
