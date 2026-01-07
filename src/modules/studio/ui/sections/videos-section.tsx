@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { GlobeIcon, LockIcon } from "lucide-react";
 
 export const VideosSection = () => {
   return (
@@ -81,7 +82,16 @@ const VideosSectionSuspense = () => {
                       </div>
                     </Link>
                   </TableCell>
-                  <TableCell>Visibility</TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      {video?.visibility === "private" ? (
+                        <LockIcon className="size-4 mr-2" />
+                      ) : (
+                        <GlobeIcon className="size-4 mr-2" />
+                      )}
+                      {snakeCaseToTitle(video?.visibility)}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center ">
                       <span>
@@ -89,7 +99,9 @@ const VideosSectionSuspense = () => {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>{format(video?.createdAt, "dd/MM/yyyy")}</TableCell>
+                  <TableCell>
+                    {format(video?.createdAt, "dd/MM/yyyy")}
+                  </TableCell>
                   <TableCell className="text-right">Views</TableCell>
                   <TableCell className="text-right">Comments</TableCell>
                   <TableCell className="text-right pr-6">Likes</TableCell>
