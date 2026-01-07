@@ -34,6 +34,7 @@ import {
 import { z } from "zod";
 import { videosUpdateSchema } from "@/db/schema";
 import { toast } from "sonner";
+import { VideoPlayer } from "@/modules/videos/ui/components/video-player";
 
 interface FormSectionProps {
   videoId: string;
@@ -57,26 +58,26 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   const [video] = trpc.studio.getOne.useSuspenseQuery({ id: videoId });
   const [categories] = trpc.categories.getMany.useSuspenseQuery();
 
-  const utils = trpc.useUtils()
+  const utils = trpc.useUtils();
 
   const update = trpc.videos.update.useMutation({
     onSuccess: () => {
-      utils.studio.getMany.invalidate()
-      utils.studio.getOne.invalidate({ id: videoId })
-      toast.success("Video updated")
+      utils.studio.getMany.invalidate();
+      utils.studio.getOne.invalidate({ id: videoId });
+      toast.success("Video updated");
     },
     onError: () => {
-      toast.error("Something went wrong")
-    }
-  })
+      toast.error("Something went wrong");
+    },
+  });
 
   const form = useForm<z.infer<typeof videosUpdateSchema>>({
     resolver: zodResolver(videosUpdateSchema),
     defaultValues: video,
   });
 
-  const onSubmit =  (data: z.infer<typeof videosUpdateSchema>) => {
-     update.mutate(data)
+  const onSubmit = (data: z.infer<typeof videosUpdateSchema>) => {
+    update.mutate(data);
   };
 
   return (
@@ -134,7 +135,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                       {...field}
                       placeholder="Add a description to your video"
                       value={field.value ?? ""}
-                      rows={10} 
+                      rows={10}
                       className="resize-none pr-10 min-h-75"
                     />
                   </FormControl>
@@ -142,26 +143,29 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                 </FormItem>
               )}
             />
-                    <FormField
+            <FormField
               control={form.control}
               name="categoryId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-               <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-               </Select>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value ?? undefined}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -169,12 +173,14 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
           </div>
 
           <div className="flex flex-col gap-y-8 lg:col-span-2">
-           <div className="flex flex-col gap-4 bg-[#F9F9F9] rounded-xl  overflow-hidden h-fit">
-<div className="aspect-video  overflow-hidden relative">
-<VideoPlayer playbackId={video.muxPlaybackId}
-thumbnailUrl={video.thumbnailUrl}/>
-</div>
-           </div>
+            <div className="flex flex-col gap-4 bg-[#F9F9F9] rounded-xl  overflow-hidden h-fit">
+              <div className="aspect-video  overflow-hidden relative">
+                <VideoPlayer
+                  playbackId={video.muxPlaybackId}
+                  thumbnailUrl={video.thumbnailUrl}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </form>
