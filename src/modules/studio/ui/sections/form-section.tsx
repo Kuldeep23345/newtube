@@ -1,19 +1,22 @@
 "use client";
-
+import { trpc } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { trpc } from "@/trpc/client";
-import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
+
 import {
   CopyCheckIcon,
   CopyIcon,
   GlobeIcon,
+  ImagePlusIcon,
   LockIcon,
   MoreVerticalIcon,
+  RotateCcw,
+  SparkleIcon,
   TrashIcon,
 } from "lucide-react";
 import { Suspense, useState } from "react";
@@ -45,6 +48,8 @@ import { VideoPlayer } from "@/modules/videos/ui/components/video-player";
 import Link from "next/link";
 import { snakeCaseToTitle } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { THUMBNAIL_FALLBACK } from "@/modules/videos/constants";
 
 interface FormSectionProps {
   videoId: string;
@@ -171,7 +176,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     <Textarea
                       {...field}
                       placeholder="Add a description to your video"
-                      value={field.value ?? ""}
+                      value={field.value || ""}
                       rows={10}
                       className="resize-none pr-10 min-h-75"
                     />
@@ -181,6 +186,51 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
               )}
             />
             <FormField
+              name="thumbnailUrl"
+              control={form.control}
+              render={() => (
+                <FormItem>
+                  <FormLabel>Thumbnail</FormLabel>
+                  <FormControl>
+                    <div className="p-0.5 border border-dashed border-neutral-400 relative h-21 w-38.25 group">
+                      <Image
+                        fill
+                        src={video.thumbnailUrl || THUMBNAIL_FALLBACK}
+                        alt="Thumbnail"
+                        className="object-cover"
+                      />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            type="button"
+                            size="icon"
+                            className="bg-black/50 hover:bg-black/50 absolute top-1 right-0 rounded-full opacity-100 md:opacity-0 group-hover:opacity-100 duration-300 size-7"
+                          >
+                            <MoreVerticalIcon className="text-white" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" side="right">
+                          <DropdownMenuItem>
+                            <ImagePlusIcon className="size-4" />
+                            Change
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <SparkleIcon className="size-4" />
+                            AI-Generate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <RotateCcw className="size-4" />
+                            Restore
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
               control={form.control}
               name="categoryId"
               render={({ field }) => (
@@ -188,7 +238,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   <FormLabel>Category</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value ?? undefined}
+                    defaultValue={field.value || undefined}
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
