@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
+import VideoThumbnail from "@/modules/videos/ui/components/video-thumbnail";
 
 export const VideosSection = () => {
   return (
@@ -61,7 +62,11 @@ const VideosSectionSuspense = () => {
                       href={`/studio/video/${video.id}`}
                       className="block hover:underline"
                     >
-                      {video.title}
+                      <div className="flex items-center gap-4">
+                        <div className="relative aspect-video w-36 shrink-0">
+                          <VideoThumbnail />
+                        </div>
+                      </div>
                     </Link>
                   </TableCell>
                   <TableCell>Visibility</TableCell>
