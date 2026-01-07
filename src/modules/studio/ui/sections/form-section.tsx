@@ -11,6 +11,8 @@ import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import {
   CopyCheckIcon,
   CopyIcon,
+  GlobeIcon,
+  LockIcon,
   MoreVerticalIcon,
   TrashIcon,
 } from "lucide-react";
@@ -41,6 +43,8 @@ import { videosUpdateSchema } from "@/db/schema";
 import { toast } from "sonner";
 import { VideoPlayer } from "@/modules/videos/ui/components/video-player";
 import Link from "next/link";
+import { snakeCaseToTitle } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface FormSectionProps {
   videoId: string;
@@ -65,12 +69,23 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   const [categories] = trpc.categories.getMany.useSuspenseQuery();
 
   const utils = trpc.useUtils();
+  const router = useRouter();
 
   const update = trpc.videos.update.useMutation({
     onSuccess: () => {
       utils.studio.getMany.invalidate();
       utils.studio.getOne.invalidate({ id: videoId });
       toast.success("Video updated");
+    },
+    onError: () => {
+      toast.error("Something went wrong");
+    },
+  });
+  const remove = trpc.videos.remove.useMutation({
+    onSuccess: () => {
+      utils.studio.getMany.invalidate();
+      toast.success("Video removed");
+      router.push("/studio");
     },
     onError: () => {
       toast.error("Something went wrong");
@@ -120,7 +135,10 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="mr-3">
-                <DropdownMenuItem className="flex items-center gap-2 text-sm ">
+                <DropdownMenuItem
+                  className="flex items-center gap-2 text-sm cursor-pointer"
+                  onClick={() => remove.mutate({ id: videoId })}
+                >
                   <TrashIcon className="size-4" />
                   Delete
                 </DropdownMenuItem>
@@ -206,7 +224,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     <div className="flex items-center gap-x-2">
                       <Link href={`/videos/${video.id}`} target="_blank">
                         <p className="line-clamp-1 text-sm text-blue-500">
-                         {fullUrl}
+                          {fullUrl}
                         </p>
                       </Link>
                       <Button
@@ -222,8 +240,57 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     </div>
                   </div>
                 </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex flex-col gap-y-1">
+                    <p className="text-muted-foreground text-xs">
+                      Video status
+                    </p>
+                    <p className="text-sm">
+                      {snakeCaseToTitle(video.muxStatus || "Processing")}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex flex-col gap-y-1">
+                    <p className="text-muted-foreground text-xs">
+                      Subtitle status
+                    </p>
+                    <p className="text-sm">
+                      {snakeCaseToTitle(video.muxTrackStatus || "no-subtitle")}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <FormField
+              control={form.control}
+              name="visibility"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Visibility</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value ?? undefined}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select visibility" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="public">
+                        <GlobeIcon className="mr-1 h-4 w-4" /> Public
+                      </SelectItem>
+                      <SelectItem value="private">
+                        <LockIcon className="mr-1 h-4 w-4" /> Private
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </div>
       </form>
