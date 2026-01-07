@@ -4,6 +4,7 @@ import {
   timestamp,
   uuid,
   uniqueIndex,
+  integer,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -52,6 +53,9 @@ export const videos = pgTable(
     muxUploadId: text("mux_upload_id").unique(),
     muxTrackId: text("mux_track_id").unique(),
     muxTrackStatus: text("mux_track_status"),
+    thumbnailUrl: text("thumbnail_url"),
+    previewUrl: text("preview_url"),
+    duration: integer("duration"),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, {
