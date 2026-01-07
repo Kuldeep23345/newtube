@@ -9,8 +9,8 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "utfs.io",
-      }
+        hostname: "*.ufs.sh",
+      },
     ],
   },
   reactCompiler: true,
