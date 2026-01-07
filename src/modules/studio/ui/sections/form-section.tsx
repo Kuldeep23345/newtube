@@ -97,6 +97,16 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
       toast.error("Something went wrong");
     },
   });
+  const restoreThumbnail = trpc.videos.restoreThumbnail.useMutation({
+    onSuccess: () => {
+      utils.studio.getMany.invalidate();
+      utils.studio.getOne.invalidate({ id: videoId });
+      toast.success("Thumbnail restored");
+    },
+    onError: () => {
+      toast.error("Something went wrong");
+    },
+  });
 
   const form = useForm<z.infer<typeof videosUpdateSchema>>({
     resolver: zodResolver(videosUpdateSchema),
@@ -228,7 +238,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                             <SparkleIcon className="size-4" />
                             AI-Generate
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={()=>restoreThumbnail.mutate({id:videoId})}>
                             <RotateCcw className="size-4" />
                             Restore
                           </DropdownMenuItem>
