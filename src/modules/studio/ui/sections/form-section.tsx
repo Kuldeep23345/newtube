@@ -8,8 +8,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { trpc } from "@/trpc/client";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
-import { MoreVerticalIcon, TrashIcon } from "lucide-react";
-import { Suspense } from "react";
+import {
+  CopyCheckIcon,
+  CopyIcon,
+  MoreVerticalIcon,
+  TrashIcon,
+} from "lucide-react";
+import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,6 +40,7 @@ import { z } from "zod";
 import { videosUpdateSchema } from "@/db/schema";
 import { toast } from "sonner";
 import { VideoPlayer } from "@/modules/videos/ui/components/video-player";
+import Link from "next/link";
 
 interface FormSectionProps {
   videoId: string;
@@ -78,6 +84,19 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
 
   const onSubmit = (data: z.infer<typeof videosUpdateSchema>) => {
     update.mutate(data);
+  };
+
+  const fullUrl = `${
+    process.env.VERCEL_URL || "http://localhost:3000"
+  }/videos/${videoId}`;
+  const [isCopied, setIsCopied] = useState(false);
+
+  const onCopy = async () => {
+    await navigator.clipboard.writeText(fullUrl);
+    setIsCopied(true);
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 2000);
   };
 
   return (
@@ -179,6 +198,30 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   playbackId={video.muxPlaybackId}
                   thumbnailUrl={video.thumbnailUrl}
                 />
+              </div>
+              <div className="p-4 flex flex-col gap-y-6">
+                <div className="flex justify-between items-center gap-x-2">
+                  <div className="flex flex-col gap-y-1">
+                    <p className="text-muted-foreground text-xs">Video link</p>
+                    <div className="flex items-center gap-x-2">
+                      <Link href={`/videos/${video.id}`} target="_blank">
+                        <p className="line-clamp-1 text-sm text-blue-500">
+                         {fullUrl}
+                        </p>
+                      </Link>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={onCopy}
+                        disabled={false}
+                      >
+                        {isCopied ? <CopyCheckIcon /> : <CopyIcon />}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
