@@ -13,10 +13,12 @@ import {
   CopyIcon,
   GlobeIcon,
   ImagePlusIcon,
+  Loader2Icon,
   LockIcon,
   MoreVerticalIcon,
   RotateCcw,
   SparkleIcon,
+  SparklesIcon,
   TrashIcon,
 } from "lucide-react";
 import { Suspense, useState } from "react";
@@ -92,6 +94,16 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
       utils.studio.getMany.invalidate();
       toast.success("Video removed");
       router.push("/studio");
+    },
+    onError: () => {
+      toast.error("Something went wrong");
+    },
+  });
+  const generateTitle = trpc.videos.generateTitle.useMutation({
+    onSuccess: () => {
+      toast.success("Background job started", {
+        description: "This may take a few minutes.",
+      });
     },
     onError: () => {
       toast.error("Something went wrong");
@@ -189,7 +201,25 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Title</FormLabel>
+                    <FormLabel>
+                      <div className="flex items-center gap-x-2">
+                        <span>Title</span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => generateTitle.mutate({ id: videoId })}
+                          className="rounded-full size-6 [&_svg]:size-3"
+                          disabled={generateTitle?.isPending}
+                        >
+                          {generateTitle?.isPending ? (
+                            <Loader2Icon className="size-4 animate-spin" />
+                          ) : (
+                            <SparklesIcon className="size-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Add a title to your video"
@@ -250,7 +280,11 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                               <ImagePlusIcon className="size-4" />
                               Change
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => generateThumbnail.mutate({ id: videoId })}>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                generateThumbnail.mutate({ id: videoId })
+                              }
+                            >
                               <SparkleIcon className="size-4" />
                               AI-Generate
                             </DropdownMenuItem>

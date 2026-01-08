@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { videos } from "@/db/schema";
 import { serve } from "@upstash/workflow/nextjs";
 import { and, eq } from "drizzle-orm";
+
 interface InputType {
   userId: string;
   videoId: string;
@@ -18,7 +19,45 @@ const TITLE_SYSTEM_PROMPT = `Your task is to generate an SEO-focused title for a
 export const { POST } = serve(async (context) => {
   const { userId, videoId } = context.requestPayload as InputType;
 
+  const video = await context.run("get-video", async () => {
+    const result = await db
+      .select()
+      .from(videos)
+      .where(and(eq(videos.id, videoId), eq(videos.userId, userId)));
+
+    if (!result[0]) {
+      throw new Error("Video not found");
+    }
+
+    return result[0];
+  });
+
+ 
+  const transcript = await context.run("get-transcript", async () => {
+    if (!video.muxPlaybackId || !video.muxTrackId) {
+      throw new Error("Missing Mux IDs");
+    }
+
+    const trackUrl = `https://stream.mux.com/${video.muxPlaybackId}/text/${video.muxTrackId}.txt`;
+    const res = await fetch(trackUrl);
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch transcript");
+    }
+
+    const text = await res.text();
+    if (!text.trim()) {
+      throw new Error("Transcript empty");
+    }
+
+    return text;
+  });
+
+  
   const title = await context.run("generate-title", async () => {
+
+    const trimmedTranscript = transcript.slice(0, 4000);
+
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -29,19 +68,20 @@ export const { POST } = serve(async (context) => {
       },
       body: JSON.stringify({
         model: "deepseek/deepseek-chat",
+        temperature: 0.7,
+        max_tokens: 20,
         messages: [
           { role: "system", content: TITLE_SYSTEM_PROMPT },
           {
             role: "user",
-            content: "Generate a YouTube title from a transcript",
+            content: `Video transcript:\n${trimmedTranscript}`,
           },
         ],
-        max_tokens: 20,
       }),
     });
 
     if (!res.ok) {
-      console.error("DeepSeek API error:", await res.text());
+      console.error("OpenRouter error:", await res.text());
       return "Untitled video";
     }
 
@@ -49,10 +89,11 @@ export const { POST } = serve(async (context) => {
     return data?.choices?.[0]?.message?.content?.trim() || "Untitled video";
   });
 
+  
   await context.run("update-video", async () => {
     await db
       .update(videos)
       .set({ title })
-      .where(and(eq(videos.id, videoId), eq(videos.userId, userId)));
+      .where(and(eq(videos.id, video.id), eq(videos.userId, video.userId)));
   });
 });
