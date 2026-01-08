@@ -53,6 +53,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { THUMBNAIL_FALLBACK } from "@/modules/videos/constants";
 import { ThumbnailUploadModal } from "../components/thumbnail-upload-modal";
+import { ThumbnailGenerateModal } from "../components/thumbnail-generate-modal";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface FormSectionProps {
   videoId: string;
@@ -69,7 +71,60 @@ export const FormSection = ({ videoId }: FormSectionProps) => {
 };
 
 const FormSectionSkeleton = () => {
-  return <div>Loading...</div>;
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-32" />
+          <Skeleton className="h-4 w-40" />
+        </div>
+        <Skeleton className="h-9 w-24" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="space-y-8 lg:col-span-3">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-16" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-56 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-21 w-38.25" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+        <div className="flex flex-col gap-y-8 lg:col-span-2">
+          <div className="flex flex-col gap-4 bg-[#fffbfb] rounded-xl overflow-hidden">
+            <Skeleton className="aspect-video " />
+            <div className="px-4 py-4 space-y-6">
+              <div className="space-y-2 ">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-5 w-full" />
+              </div>
+              <div className="space-y-2 ">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-5 w-full" />
+              </div>
+              <div className="space-y-2 ">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-5 w-full" />
+              </div>
+            </div>
+          </div>
+          <div className="space-y-2 ">
+            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-8 w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
@@ -119,16 +174,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
       toast.error("Something went wrong");
     },
   });
-  const generateThumbnail = trpc.videos.generateThumbnail.useMutation({
-    onSuccess: () => {
-      toast.success("Background job started", {
-        description: "This may take a few minutes.",
-      });
-    },
-    onError: () => {
-      toast.error("Something went wrong");
-    },
-  });
+
   const restoreThumbnail = trpc.videos.restoreThumbnail.useMutation({
     onSuccess: () => {
       utils.studio.getMany.invalidate();
@@ -164,9 +210,16 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
 
   const [thumbnailUploadModalOpen, setThumbnailUploadModalOpen] =
     useState(false);
+  const [thumbnailGenerateModalOpen, setThumbnailGenerateModalOpen] =
+    useState(false);
 
   return (
     <>
+      <ThumbnailGenerateModal
+        videoId={videoId}
+        open={thumbnailGenerateModalOpen}
+        onOpenChange={setThumbnailGenerateModalOpen}
+      />
       <ThumbnailUploadModal
         videoId={videoId}
         open={thumbnailUploadModalOpen}
@@ -220,7 +273,9 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                           size="icon"
                           onClick={() => generateTitle.mutate({ id: videoId })}
                           className="rounded-full size-6 [&_svg]:size-3"
-                          disabled={generateTitle?.isPending || !video.muxTrackId}
+                          disabled={
+                            generateTitle?.isPending || !video.muxTrackId
+                          }
                         >
                           {generateTitle?.isPending ? (
                             <Loader2Icon className="size-4 animate-spin" />
@@ -252,9 +307,13 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                           type="button"
                           variant="outline"
                           size="icon"
-                          onClick={() => generateDescription.mutate({ id: videoId })}
+                          onClick={() =>
+                            generateDescription.mutate({ id: videoId })
+                          }
                           className="rounded-full size-6 [&_svg]:size-3"
-                          disabled={generateDescription?.isPending || !video.muxTrackId}
+                          disabled={
+                            generateDescription?.isPending || !video.muxTrackId
+                          }
                         >
                           {generateDescription?.isPending ? (
                             <Loader2Icon className="size-4 animate-spin" />
@@ -270,7 +329,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                         placeholder="Add a description to your video"
                         value={field.value || ""}
                         rows={10}
-                        className="resize-none pr-10 min-h-75"
+                        className="resize-none pr-10 min-h-56"
                       />
                     </FormControl>
                     <FormMessage />
@@ -310,7 +369,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
-                                generateThumbnail.mutate({ id: videoId })
+                                setThumbnailGenerateModalOpen(true)
                               }
                             >
                               <SparkleIcon className="size-4" />
