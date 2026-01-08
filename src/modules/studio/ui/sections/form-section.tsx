@@ -109,6 +109,16 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
       toast.error("Something went wrong");
     },
   });
+  const generateDescription = trpc.videos.generateDescription.useMutation({
+    onSuccess: () => {
+      toast.success("Background job started", {
+        description: "This may take a few minutes.",
+      });
+    },
+    onError: () => {
+      toast.error("Something went wrong");
+    },
+  });
   const generateThumbnail = trpc.videos.generateThumbnail.useMutation({
     onSuccess: () => {
       toast.success("Background job started", {
@@ -210,7 +220,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                           size="icon"
                           onClick={() => generateTitle.mutate({ id: videoId })}
                           className="rounded-full size-6 [&_svg]:size-3"
-                          disabled={generateTitle?.isPending}
+                          disabled={generateTitle?.isPending || !video.muxTrackId}
                         >
                           {generateTitle?.isPending ? (
                             <Loader2Icon className="size-4 animate-spin" />
@@ -235,7 +245,25 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>
+                      <div className="flex items-center gap-x-2">
+                        <span>Description</span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => generateDescription.mutate({ id: videoId })}
+                          className="rounded-full size-6 [&_svg]:size-3"
+                          disabled={generateDescription?.isPending || !video.muxTrackId}
+                        >
+                          {generateDescription?.isPending ? (
+                            <Loader2Icon className="size-4 animate-spin" />
+                          ) : (
+                            <SparklesIcon className="size-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
