@@ -32,7 +32,49 @@ export const usersRelations = relations(users, ({ many }) => ({
   videos: many(videos),
   videoViews: many(videoViews),
   videoReactions: many(videoReactions),
+  subscriptions: many(subscriptions, {
+    relationName: "subscriptions_viewer_id_fkey",
+  }),
+  subscribers: many(subscriptions, {
+    relationName: "subscriptions_creator_id_fkey",
+  }),
 }));
+
+export const subscriptions = pgTable("subscriptions", {
+  viewerId: uuid("viewer_id")
+    .notNull()
+    .references(() => users.id, {
+      onDelete: "cascade",
+    }),
+  creatorId: uuid("creator_id")
+    .notNull()
+    .references(() => users.id, {
+      onDelete: "cascade",
+    }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+} , (t) => [
+  primaryKey({
+    name: "subscriptions_pk",
+    columns: [t.viewerId, t.creatorId],
+  }),
+]);
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  viewerId: one(users, {
+    fields: [subscriptions.viewerId],
+    references: [users.id],
+    relationName: "subscriptions_viewer_id_fkey",
+    
+  }),
+  creatorId: one(users, {
+    fields: [subscriptions.creatorId],
+    references: [users.id],
+    relationName: "subscriptions_creator_id_fkey",
+  }),
+}));
+
+
 
 export const categories = pgTable(
   "categories",
@@ -143,9 +185,7 @@ export const videoViewsInsertSchema = createInsertSchema(videoViews);
 export const videoViewsSelectSchema = createSelectSchema(videoViews);
 export const videoViewsUpdateSchema = createUpdateSchema(videoViews);
 
-
 export const reactionType = pgEnum("reaction_type", ["like", "dislike"]);
-
 
 export const videoReactions = pgTable(
   "video_reactions",
@@ -182,7 +222,6 @@ export const videoReactionsRelations = relations(videoReactions, ({ one }) => ({
     references: [videos.id],
   }),
 }));
-
 
 export const videoReactionsInsertSchema = createInsertSchema(videoReactions);
 export const videoReactionsSelectSchema = createSelectSchema(videoReactions);
