@@ -23,8 +23,7 @@ export const HomeNavbar = () => {
         </div>
 
         <div className="flex shrink-0 items-center">
-            <AuthButton/>
-     
+          <AuthButton />
         </div>
       </div>
     </nav>
