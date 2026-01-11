@@ -6,8 +6,29 @@ import {
   protectedProcedure,
 } from "@/trpc/init";
 import z from "zod";
-import { and, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
 export const commentsRouter = createTRPCRouter({
+  remove: protectedProcedure
+    .input(
+      z.object({
+        videoId: z.string(),
+        value: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { videoId, value } = input;
+      const { id: userId } = ctx.user;
+
+      const [createdComment] = await db
+        .insert(comments)
+        .values({
+          userId,
+          videoId,
+          value,
+        })
+        .returning();
+      return createdComment;
+    }),
   create: protectedProcedure
     .input(
       z.object({
@@ -44,29 +65,38 @@ export const commentsRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       const { videoId, cursor, limit } = input;
-      const data = await db
-        .select({
-          ...getTableColumns(comments),
-          user: users,
-        })
-        .from(comments)
-        .where(
-          and(
-            eq(comments.videoId, videoId),
-            cursor
-              ? or(
-                  lt(comments.updatedAt, cursor.updatedAt),
-                  and(
-                    eq(comments.updatedAt, cursor.updatedAt),
-                    lt(comments.id, cursor.id)
+
+      const [totalData, data] = await Promise.all([
+        db
+          .select({ count: count() })
+          .from(comments)
+          .where(eq(comments.videoId, videoId)),
+
+        db
+          .select({
+            ...getTableColumns(comments),
+            user: users,
+          })
+          .from(comments)
+          .where(
+            and(
+              eq(comments.videoId, videoId),
+              cursor
+                ? or(
+                    lt(comments.updatedAt, cursor.updatedAt),
+                    and(
+                      eq(comments.updatedAt, cursor.updatedAt),
+                      lt(comments.id, cursor.id)
+                    )
                   )
-                )
-              : undefined
+                : undefined
+            )
           )
-        )
-        .innerJoin(users, eq(comments.userId, users.id))
-        .orderBy(desc(comments.updatedAt), desc(comments.id))
-        .limit(limit + 1);
+          .innerJoin(users, eq(comments.userId, users.id))
+          .orderBy(desc(comments.updatedAt), desc(comments.id))
+          .limit(limit + 1),
+      ]);
+
       const hasMore = data.length > limit;
       const items = hasMore ? data.slice(0, -1) : data;
       const lastItem = items[items.length - 1];
@@ -81,6 +111,7 @@ export const commentsRouter = createTRPCRouter({
       return {
         items,
         nextCursor,
+        totalCount: totalData[0].count,
       };
     }),
 });
