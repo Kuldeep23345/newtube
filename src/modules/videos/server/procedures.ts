@@ -57,8 +57,13 @@ export const videosRouter = createTRPCRouter({
           ...getTableColumns(videos),
           user: {
             ...getTableColumns(users),
-            subscriptionsCount:db.$count(subscriptions,eq(subscriptions.creatorId,users.id)),
-            viewerSubscribed:isNotNull(viewerSubscriptions.viewerId).mapWith(Boolean)
+            subscriptionsCount: db.$count(
+              subscriptions,
+              eq(subscriptions.creatorId, users.id)
+            ),
+            viewerSubscribed: isNotNull(viewerSubscriptions.viewerId).mapWith(
+              Boolean
+            ),
           },
           viewsCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
           likeCount: db.$count(
@@ -80,9 +85,12 @@ export const videosRouter = createTRPCRouter({
         .from(videos)
         .innerJoin(users, eq(videos.userId, users.id))
         .leftJoin(viewerReactions, eq(videos.id, viewerReactions.videoId))
-        .leftJoin(viewerSubscriptions, eq(viewerSubscriptions.creatorId , users.id))
-        .where(eq(videos.id, input.id))
-        // .groupBy(videos.id, users.id, viewerReactions.type);
+        .leftJoin(
+          viewerSubscriptions,
+          eq(viewerSubscriptions.creatorId, users.id)
+        )
+        .where(eq(videos.id, input.id));
+      // .groupBy(videos.id, users.id, viewerReactions.type);
       if (!existingVideo) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Video not found" });
       }
@@ -122,6 +130,58 @@ export const videosRouter = createTRPCRouter({
       });
       return workflowRunId;
     }),
+  revalidate: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+      const [existingVideo] = await db
+        .select()
+        .from(videos)
+        .where(and(eq(videos.id, input.id), eq(videos.userId, userId)));
+      if (!existingVideo) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Video not found" });
+      }
+
+      if (!existingVideo.muxUploadId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Video not found",
+        });
+      }
+
+      const upload = await mux.video.uploads.retrieve(
+        existingVideo.muxUploadId
+      );
+      if (!upload || !upload.asset_id) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Video not found",
+        });
+      }
+
+      const assest = await mux.video.assets.retrieve(upload.asset_id);
+      if (!assest) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Video not found",
+        });
+      }
+      const playbackId = assest.playback_ids?.[0]?.id;
+      const duration = assest.duration ? Math.round(assest.duration * 1000) : 0;
+
+      const [updatedVideo] = await db
+        .update(videos)
+        .set({
+          muxStatus: assest.status,
+          muxPlaybackId: playbackId,
+          muxAssetId: assest.id,
+          duration,
+        })
+        .where(and(eq(videos.id, input.id), eq(videos.userId, userId)))
+        .returning();
+      return updatedVideo;
+    }),
+
   restoreThumbnail: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
