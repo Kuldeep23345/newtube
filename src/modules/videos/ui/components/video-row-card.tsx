@@ -11,7 +11,7 @@ import {
 import { UserAvatar } from "@/components/user-avatar";
 import { UserInfo } from "@/modules/users/ui/components/user-info";
 import { VideoMenu } from "./video-menu";
-import {VideoThumbnail} from "./video-thumbnail";
+import { VideoThumbnail } from "./video-thumbnail";
 import { VideoGetManyOutput } from "../../types";
 
 const videoRowCardVariants = cva("group flex min-w-0", {
@@ -48,6 +48,18 @@ export const VideoRowCardSkeleton = () => {
 };
 
 export const VideoRowCard = ({ data, size, onRemove }: VideoRowCardProps) => {
+  const compactViews = useMemo(() => {
+    return Intl.NumberFormat("en", {
+      notation: "compact",
+    }).format(data.viewCount);
+  }, [data.viewCount]);
+
+  const compactLikes = useMemo(() => {
+    return Intl.NumberFormat("en", {
+      notation: "compact",
+    }).format(data.likeCount);
+  }, [data.likeCount]);
+
   return (
     <div className={videoRowCardVariants({ size })}>
       <Link href={`/video/${data.id}`} className={thumbnailVariants({ size })}>
@@ -58,6 +70,60 @@ export const VideoRowCard = ({ data, size, onRemove }: VideoRowCardProps) => {
           duration={data.duration}
         />
       </Link>
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between gap-x-2">
+          <Link href={`/videos/${data.id}`} className="flex-1 min-w-0">
+            <h3
+              className={cn(
+                "font-medium line-clamp-2",
+                size === "compact" ? "text-sm" : "text-base"
+              )}
+            >
+              {data.title}
+            </h3>
+            {size === "default" && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {compactViews} views • {compactLikes} likes
+              </p>
+            )}
+            {size === "default" && (
+              <>
+                <div className="flex items-center gap-2 my-3">
+                  <UserAvatar
+                    size="sm"
+                    imageUrl={data.user.imageUrl}
+                    name={data.user.name}
+                  />
+                  <UserInfo size="sm" name={data.user.name} />
+                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="text-xs text-muted-foreground w-fit line-clamp-2">
+                      {data.description || "No description"}
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="bottom"
+                    align="center"
+                    className="bg-black/70"
+                  >
+                    <p> From the video description</p>
+                  </TooltipContent>
+                </Tooltip>
+              </>
+            )}
+            {size === "compact" && <UserInfo size="sm" name={data.user.name} />}
+            {size === "compact" && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {compactViews} views • {compactLikes} likes
+              </p>
+            )}
+          </Link>
+          <div className="flex-none">
+            <VideoMenu onRemove={onRemove} videoId={data.id} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
