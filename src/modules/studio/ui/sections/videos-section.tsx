@@ -8,7 +8,7 @@ import { DEFAULT_LIMIT } from "@/constants";
 import { snakeCaseToTitle } from "@/lib/utils";
 import { ErrorBoundary } from "react-error-boundary";
 import { InfiniteScroll } from "@/components/infinite-scroll";
-import VideoThumbnail from "@/modules/videos/ui/components/video-thumbnail";
+import {VideoThumbnail} from "@/modules/videos/ui/components/video-thumbnail";
 import {
   Table,
   TableBody,

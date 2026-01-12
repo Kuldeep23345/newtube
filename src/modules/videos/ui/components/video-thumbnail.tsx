@@ -9,12 +9,12 @@ interface VideoThumbnailProps {
   duration?: number;
 }
 
-export default function VideoThumbnail({
+export const VideoThumbnail = ({
   imageUrl,
   previewUrl,
   title,
   duration,
-}: VideoThumbnailProps) {
+}: VideoThumbnailProps) => {
   return (
     <div className="relative group">
       <div className="relative aspect-video w-full overflow-hidden rounded-xl">
