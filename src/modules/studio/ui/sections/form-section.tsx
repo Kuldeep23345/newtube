@@ -16,6 +16,7 @@ import {
   Loader2Icon,
   LockIcon,
   MoreVerticalIcon,
+  RefreshCcwIcon,
   RotateCcw,
   SparkleIcon,
   SparklesIcon,
@@ -154,6 +155,16 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
       toast.error("Something went wrong");
     },
   });
+  const revalidate = trpc.videos.revalidate.useMutation({
+    onSuccess: () => {
+      utils.studio.getMany.invalidate();
+      utils.studio.getOne.invalidate({ id: videoId });
+      toast.success("Video revalidated");
+    },
+    onError: () => {
+      toast.error("Something went wrong");
+    },
+  });
   const generateTitle = trpc.videos.generateTitle.useMutation({
     onSuccess: () => {
       toast.success("Background job started", {
@@ -246,6 +257,13 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="mr-3">
+                  <DropdownMenuItem
+                    className="flex items-center gap-2 text-sm cursor-pointer"
+                    onClick={() => revalidate.mutate({ id: videoId })}
+                  >
+                    <RefreshCcwIcon className="size-4" />
+                    Revalidate
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     className="flex items-center gap-2 text-sm cursor-pointer"
                     onClick={() => remove.mutate({ id: videoId })}
