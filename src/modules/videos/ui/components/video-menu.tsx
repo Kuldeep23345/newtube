@@ -20,11 +20,13 @@ interface VideoMenuProps {
   onRemove?: () => void;
 }
 
-export const VideoMenu = ({ videoId, variant ="ghost", onRemove }: VideoMenuProps) => {
+export const VideoMenu = ({
+  videoId,
+  variant = "ghost",
+  onRemove,
+}: VideoMenuProps) => {
   const onShare = () => {
-    const fullUrl = `${
-      APP_URL || "http://localhost:3000"
-    }/videos/${videoId}`;
+    const fullUrl = `${APP_URL}/videos/${videoId}`;
     navigator.clipboard.writeText(fullUrl);
     toast.success("Video URL copied to clipboard");
   };

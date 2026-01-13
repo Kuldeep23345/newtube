@@ -12,6 +12,7 @@ import {
   VideoGridCard,
   VideoGridCardSkeleton,
 } from "@/modules/videos/ui/components/video-grid-card";
+import { InfiniteScroll } from "@/components/infinite-scroll";
 
 interface ResultsSectionProps {
   query: string | undefined;
@@ -49,6 +50,11 @@ export const ResultsSection = ({ query, categoryId }: ResultsSectionProps) => {
             ))}
         </div>
       )}
+      <InfiniteScroll
+      hasNextPage={resultQuery.hasNextPage}
+      isFetchingNextPage={resultQuery.isFetchingNextPage}
+      fetchNextPage={resultQuery.fetchNextPage}
+      />
     </>
   );
 };
