@@ -169,6 +169,7 @@ export const videosRouter = createTRPCRouter({
       const playbackId = assest.playback_ids?.[0]?.id;
       const duration = assest.duration ? Math.round(assest.duration * 1000) : 0;
 
+
       const [updatedVideo] = await db
         .update(videos)
         .set({
