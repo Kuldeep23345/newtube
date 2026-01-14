@@ -1,29 +1,47 @@
 import { db } from "@/db";
 import {
+  playlists,
   users,
   videoReactions,
   videos,
   videoViews,
 } from "@/db/schema";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from "@/trpc/init";
+import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { TRPCError } from "@trpc/server";
 
-import {
-  and,
-  desc,
-  eq,
-  getTableColumns,
- 
-  lt,
-  or,
-} from "drizzle-orm";
+import { and, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
 
 import z from "zod";
 
 export const playlistsRouter = createTRPCRouter({
-   getLiked: protectedProcedure
+  create: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { id: userId } = ctx.user;
+      const { name } = input;
+
+      const [createdPlaylist] = await db
+        .insert(playlists)
+        .values({
+          name,
+          userId,
+        })
+        .returning();
+
+      if (!createdPlaylist)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Failed to create playlist",
+        });
+
+      return createdPlaylist;
+    }),
+
+  getLiked: protectedProcedure
     .input(
       z.object({
         cursor: z
@@ -46,7 +64,12 @@ export const playlistsRouter = createTRPCRouter({
             likedAt: videoReactions.updatedAt,
           })
           .from(videoReactions)
-          .where(and(eq(videoReactions.userId, userId), eq(videoReactions.type, "like")))
+          .where(
+            and(
+              eq(videoReactions.userId, userId),
+              eq(videoReactions.type, "like")
+            )
+          )
       );
 
       const data = await db
@@ -73,7 +96,10 @@ export const playlistsRouter = createTRPCRouter({
         })
         .from(videos)
         .innerJoin(users, eq(videos.userId, users.id))
-        .innerJoin(viewerVideoReactions, eq(videos.id, viewerVideoReactions.videoId))
+        .innerJoin(
+          viewerVideoReactions,
+          eq(videos.id, viewerVideoReactions.videoId)
+        )
         .where(
           and(
             eq(videos.visibility, "public"),
