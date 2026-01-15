@@ -8,7 +8,7 @@ import { DEFAULT_LIMIT } from "@/constants";
 import { snakeCaseToTitle } from "@/lib/utils";
 import { ErrorBoundary } from "react-error-boundary";
 import { InfiniteScroll } from "@/components/infinite-scroll";
-import {VideoThumbnail} from "@/modules/videos/ui/components/video-thumbnail";
+import { VideoThumbnail } from "@/modules/videos/ui/components/video-thumbnail";
 import {
   Table,
   TableBody,
@@ -117,7 +117,10 @@ const VideosSectionSuspense = () => {
               .map((video) => (
                 <TableRow key={video.id} className="cursor-pointer">
                   <TableCell className="pl-6">
-                    <Link href={`/studio/videos/${video.id}`} className="block ">
+                    <Link
+                      href={`/studio/videos/${video.id}`}
+                      className="block "
+                    >
                       <div className="flex items-center gap-4">
                         <div className="relative aspect-video w-36 shrink-0">
                           <VideoThumbnail
@@ -158,9 +161,15 @@ const VideosSectionSuspense = () => {
                   <TableCell>
                     {format(video?.createdAt, "dd/MM/yyyy")}
                   </TableCell>
-                  <TableCell className="text-right">Views</TableCell>
-                  <TableCell className="text-right">Comments</TableCell>
-                  <TableCell className="text-right pr-6">Likes</TableCell>
+                  <TableCell className="text-right">
+                    {video.viewCount}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {video.commentCount}
+                  </TableCell>
+                  <TableCell className="text-right pr-6">
+                    {video.likeCount}
+                  </TableCell>
                 </TableRow>
               ))}
           </TableBody>
