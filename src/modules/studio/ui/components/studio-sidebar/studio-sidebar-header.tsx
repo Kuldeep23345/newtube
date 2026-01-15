@@ -4,7 +4,6 @@ import { UserAvatar } from "@/components/user-avatar";
 import { useUser } from "@clerk/nextjs";
 import {
   SidebarHeader,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
