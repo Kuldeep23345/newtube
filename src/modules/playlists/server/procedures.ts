@@ -7,7 +7,6 @@ import {
   videos,
   videoViews,
 } from "@/db/schema";
-import { VideoGridCard } from "@/modules/videos/ui/components/video-grid-card";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 
@@ -16,6 +15,125 @@ import { and, desc, eq, getTableColumns, lt, or, sql } from "drizzle-orm";
 import z from "zod";
 
 export const playlistsRouter = createTRPCRouter({
+  removeVideo: protectedProcedure
+    .input(
+      z.object({
+        playlistId: z.string().uuid(),
+        videoId: z.string().uuid(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { id: userId } = ctx.user;
+      const { playlistId, videoId } = input;
+
+      const [existingPlaylist] = await db
+        .select()
+        .from(playlists)
+        .where(and(eq(playlists.id, playlistId), eq(playlists.userId, userId)));
+
+      if (!existingPlaylist)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Playlist not found",
+        });
+
+      const [existingVideo] = await db
+        .select()
+        .from(videos)
+        .where(eq(videos.id, videoId));
+
+      if (!existingVideo)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Video not found",
+        });
+
+      const [existingPlaylistVideo] = await db
+        .select()
+        .from(playlistVideos)
+        .where(
+          and(
+            eq(playlistVideos.playlistId, playlistId),
+            eq(playlistVideos.videoId, videoId)
+          )
+        );
+
+      if (!existingPlaylistVideo)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Video not found in playlist",
+        });
+
+      const [deletedPlaylistVideo] = await db
+        .delete(playlistVideos)
+        .where(
+          and(
+            eq(playlistVideos.playlistId, playlistId),
+            eq(playlistVideos.videoId, videoId)
+          )
+        )
+        .returning();
+      return deletedPlaylistVideo;
+    }),
+  addVideo: protectedProcedure
+    .input(
+      z.object({
+        playlistId: z.string().uuid(),
+        videoId: z.string().uuid(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { id: userId } = ctx.user;
+      const { playlistId, videoId } = input;
+
+      const [existingPlaylist] = await db
+        .select()
+        .from(playlists)
+        .where(and(eq(playlists.id, playlistId), eq(playlists.userId, userId)));
+
+      if (!existingPlaylist)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Playlist not found",
+        });
+
+      const [existingVideo] = await db
+        .select()
+        .from(videos)
+        .where(eq(videos.id, videoId));
+
+      if (!existingVideo)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Video not found",
+        });
+
+      const [existingPlaylistVideo] = await db
+        .select()
+        .from(playlistVideos)
+        .where(
+          and(
+            eq(playlistVideos.playlistId, playlistId),
+            eq(playlistVideos.videoId, videoId)
+          )
+        );
+
+      if (existingPlaylistVideo)
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Video already exists in playlist",
+        });
+
+      const [createdPlaylistVideo] = await db
+        .insert(playlistVideos)
+        .values({
+          playlistId,
+          videoId,
+        })
+        .returning();
+      return createdPlaylistVideo;
+    }),
+
   getManyForVideo: protectedProcedure
     .input(
       z.object({
@@ -36,10 +154,13 @@ export const playlistsRouter = createTRPCRouter({
       const data = await db
         .select({
           ...getTableColumns(playlists),
-          videoCount: db.$count(playlistVideos, eq(playlistVideos.playlistId, playlists.id)),
-          user:users,
-          containsVideo: videoId 
-          ? sql<boolean>`(
+          videoCount: db.$count(
+            playlistVideos,
+            eq(playlistVideos.playlistId, playlists.id)
+          ),
+          user: users,
+          containsVideo: videoId
+            ? sql<boolean>`(
             SELECT EXISTS(
               SELECT 1
               FROM ${playlistVideos} pv
@@ -47,7 +168,7 @@ export const playlistsRouter = createTRPCRouter({
               AND pv.video_id = ${videoId}
             )
           )`
-          :sql<boolean>`false`,
+            : sql<boolean>`false`,
         })
         .from(playlists)
         .innerJoin(users, eq(playlists.userId, users.id))
@@ -104,8 +225,19 @@ export const playlistsRouter = createTRPCRouter({
       const data = await db
         .select({
           ...getTableColumns(playlists),
-          videoCount: db.$count(playlistVideos, eq(playlistVideos.playlistId, playlists.id)),
-          user:users,
+          videoCount: db.$count(
+            playlistVideos,
+            eq(playlistVideos.playlistId, playlists.id)
+          ),
+          user: users,
+          thumbnailUrl: sql<string | null>`(
+            SELECT v.thumbnail_url
+            FROM ${playlistVideos} pv
+            JOIN ${videos} v ON v.id = pv.video_id
+            WHERE pv.playlist_id = ${playlists.id}
+            ORDER BY pv.updated_at DESC
+            LIMIT 1
+          )`,
         })
         .from(playlists)
         .innerJoin(users, eq(playlists.userId, users.id))
