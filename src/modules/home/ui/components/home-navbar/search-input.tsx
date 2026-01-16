@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { APP_URL } from "@/constants";
+
 import { SearchIcon, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -24,20 +24,19 @@ const SearchInputSuspense = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const url = new URL("/search", APP_URL);
     const newQuery = value.trim();
+    const params = new URLSearchParams();
 
-    url.searchParams.set("query", encodeURIComponent(newQuery));
+    if (newQuery) {
+      params.set("query", newQuery);
+    }
 
     if (categoryId) {
-      url.searchParams.set("categoryId", categoryId);
+      params.set("categoryId", categoryId);
     }
 
-    if (newQuery === "") {
-      url.searchParams.delete("query");
-    }
     setValue(newQuery);
-    router.push(url.toString());
+    router.push(`/search?${params.toString()}`);
   };
 
   return (
