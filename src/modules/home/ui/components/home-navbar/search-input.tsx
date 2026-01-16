@@ -1,18 +1,26 @@
-'use client'
+"use client";
 import { Button } from "@/components/ui/button";
 import { APP_URL } from "@/constants";
 import { SearchIcon, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const SearchInput = () => {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const query = searchParams.get("query") || ""
-  const categoryId = searchParams.get("categoryId") || ""
+  return (
+    <Suspense fallback={<Skeleton className="h-10 w-full" />}>
+      <SearchInputSuspense />
+    </Suspense>
+  );
+};
+
+const SearchInputSuspense = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const query = searchParams.get("query") || "";
+  const categoryId = searchParams.get("categoryId") || "";
   const [value, setValue] = useState(query);
-  
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,15 +29,15 @@ export const SearchInput = () => {
 
     url.searchParams.set("query", encodeURIComponent(newQuery));
 
-    if(categoryId){
-      url.searchParams.set("categoryId", categoryId)
+    if (categoryId) {
+      url.searchParams.set("categoryId", categoryId);
     }
 
-    if(newQuery === ""){
-      url.searchParams.delete("query")
+    if (newQuery === "") {
+      url.searchParams.delete("query");
     }
-    setValue(newQuery)
-    router.push(url.toString())
+    setValue(newQuery);
+    router.push(url.toString());
   };
 
   return (
@@ -54,7 +62,7 @@ export const SearchInput = () => {
         )}
       </div>
       <button
-      disabled={!value.trim()}
+        disabled={!value.trim()}
         type="submit"
         className="px-5 py-2.5 rounded-r-full border border-l-0 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
