@@ -43,7 +43,9 @@ interface VideoRowCardProps extends VariantProps<typeof videoRowCardVariants> {
   onRemove?: () => void;
 }
 
-export const VideoRowCardSkeleton = ({ size='default' }: VariantProps<typeof videoRowCardVariants>) => {
+export const VideoRowCardSkeleton = ({
+  size = "default",
+}: VariantProps<typeof videoRowCardVariants>) => {
   return (
     <div className={videoRowCardVariants({ size })}>
       <div className={thumbnailVariants({ size })}>
@@ -76,7 +78,11 @@ export const VideoRowCardSkeleton = ({ size='default' }: VariantProps<typeof vid
   );
 };
 
-export const VideoRowCard = ({ data, size='default', onRemove }: VideoRowCardProps) => {
+export const VideoRowCard = ({
+  data,
+  size = "default",
+  onRemove,
+}: VideoRowCardProps) => {
   const compactViews = useMemo(() => {
     return Intl.NumberFormat("en", {
       notation: "compact",
@@ -91,7 +97,11 @@ export const VideoRowCard = ({ data, size='default', onRemove }: VideoRowCardPro
 
   return (
     <div className={videoRowCardVariants({ size })}>
-      <Link href={`/videos/${data.id}`} className={thumbnailVariants({ size })}>
+      <Link
+        prefetch
+        href={`/videos/${data.id}`}
+        className={thumbnailVariants({ size })}
+      >
         <VideoThumbnail
           imageUrl={data.thumbnailUrl}
           previewUrl={data.previewUrl}
@@ -101,7 +111,7 @@ export const VideoRowCard = ({ data, size='default', onRemove }: VideoRowCardPro
       </Link>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between gap-x-2">
-          <Link href={`/videos/${data.id}`} className="flex-1 min-w-0">
+          <Link prefetch href={`/videos/${data.id}`} className="flex-1 min-w-0">
             <h3
               className={cn(
                 "font-medium line-clamp-2",

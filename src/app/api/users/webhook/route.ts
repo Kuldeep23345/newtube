@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       const data = evt.data;
       await db.insert(users).values({
         clerkId: data.id,
-        name: `${data.first_name} ${data.last_name}`,
+        name: `${data.first_name} ${data.last_name || ""}`.trim(),
         imageUrl: data.image_url,
       });
     }
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       await db
         .update(users)
         .set({
-          name: `${data.first_name} ${data.last_name}`,
+          name: `${data.first_name} ${data.last_name || ""}`.trim(),
           imageUrl: data.image_url,
         })
         .where(eq(users.clerkId, data.id));

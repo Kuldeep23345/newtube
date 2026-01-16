@@ -118,6 +118,7 @@ const VideosSectionSuspense = () => {
                 <TableRow key={video.id} className="cursor-pointer">
                   <TableCell className="pl-6">
                     <Link
+                      prefetch
                       href={`/studio/videos/${video.id}`}
                       className="block "
                     >
@@ -132,10 +133,11 @@ const VideosSectionSuspense = () => {
                         </div>
                         <div className="flex flex-col overflow-hidden gap-y-1">
                           <span className="text-sm line-clamp-1">
-                            {video?.title}
+                            {video?.title?.slice(0, 50) || "No title"}
                           </span>
                           <span className="text-xs text-muted-foreground line-clamp-1">
-                            {video?.description || "No description"}
+                            {video?.description?.slice(0, 50) ||
+                              "No description"}
                           </span>
                         </div>
                       </div>

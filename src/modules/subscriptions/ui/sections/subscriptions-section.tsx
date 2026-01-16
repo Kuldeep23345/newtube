@@ -6,7 +6,10 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
-import { SubscriptionItem, SubscriptionItemSkeleton } from "../components/subscription-item";
+import {
+  SubscriptionItem,
+  SubscriptionItemSkeleton,
+} from "../components/subscription-item";
 
 export const SubscriptionsSection = () => {
   return (
@@ -20,13 +23,11 @@ export const SubscriptionsSection = () => {
 
 const SubscriptionsSectionSkeleton = () => {
   return (
-
-      <div className="flex flex-col gap-4 ">
-        {Array.from({ length: 18 }).map((_, index) => (
-          <SubscriptionItemSkeleton key={index} />
-        ))}
-      </div>
-
+    <div className="flex flex-col gap-4 ">
+      {Array.from({ length: 18 }).map((_, index) => (
+        <SubscriptionItemSkeleton key={index} />
+      ))}
+    </div>
   );
 };
 
@@ -57,6 +58,7 @@ const SubscriptionsSectionSuspense = () => {
           .flatMap((page) => page.items)
           .map((subscription) => (
             <Link
+              prefetch
               href={`/users/${subscription.user.id}`}
               key={subscription.creatorId}
             >

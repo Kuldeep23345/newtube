@@ -23,16 +23,19 @@ export const StudioSidebar = () => {
       <SidebarContent className="bg-background">
         <SidebarGroup>
           <SidebarMenu>
-          
-              <StudioSidebarHeader />
-       
+            <StudioSidebarHeader />
+
             <SidebarMenuItem>
               <SidebarMenuButton
                 isActive={pathname === "/studio"}
                 tooltip="Content"
                 asChild
               >
-                <Link href="/studio" className="flex items-center gap-2">
+                <Link
+                  prefetch
+                  href="/studio"
+                  className="flex items-center gap-2"
+                >
                   <VideoIcon className="size-5" />
                   <span className="text-sm">Content</span>
                 </Link>
@@ -41,7 +44,7 @@ export const StudioSidebar = () => {
             <Separator />
             <SidebarMenuItem>
               <SidebarMenuButton tooltip="Exit Studio" asChild>
-                <Link href="/" className="flex items-center gap-2">
+                <Link prefetch href="/" className="flex items-center gap-2">
                   <LogOutIcon className="size-5" />
                   <span className="text-sm">Exit Studio</span>
                 </Link>
