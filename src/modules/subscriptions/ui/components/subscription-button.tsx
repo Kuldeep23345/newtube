@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 import{Button} from "@/components/ui/button"
 
 interface SubscriptionButtonProps {
-  onClick: () => void;
+  onClick: (e: any) => void;
   disabled: boolean;
   isSubscribed: boolean;
   className?: string;
