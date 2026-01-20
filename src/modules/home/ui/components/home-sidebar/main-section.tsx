@@ -47,7 +47,7 @@ export const MainSection = () => {
 
   return (
     <SidebarGroup>
-      <SidebarGroupContent className="pt-10">
+      <SidebarGroupContent className="pt-10 md:pt-0">
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
