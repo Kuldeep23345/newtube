@@ -7,6 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { UserAvatar } from "@/components/user-avatar";
 import { DEFAULT_LIMIT } from "@/constants";
@@ -43,6 +44,12 @@ export const SubscriptionsSection = () => {
     }
   );
 
+   const { isMobile, setOpenMobile } = useSidebar();
+
+  const closeSidebar = () => {
+    if (isMobile) setOpenMobile(false);
+  };
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Subscriptions</SidebarGroupLabel>
@@ -65,6 +72,7 @@ export const SubscriptionsSection = () => {
                       prefetch
                       href={`/users/${subscription.user.id}`}
                       className="flex items-center gap-4"
+                      onClick={closeSidebar}
                     >
                       <UserAvatar
                         size="xs"
@@ -86,6 +94,7 @@ export const SubscriptionsSection = () => {
                   prefetch
                   href="/subscriptions"
                   className="flex items-center gap-4"
+                  onClick={closeSidebar}
                 >
                   <ListIcon className="size-4" />
                   <span className="text-sm">All ubscriptions</span>

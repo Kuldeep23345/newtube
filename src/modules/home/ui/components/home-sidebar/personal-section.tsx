@@ -7,11 +7,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { HistoryIcon, ListVideo, ThumbsUpIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 const items = [
   {
     title: "History",
@@ -37,6 +39,12 @@ export const PersonalSection = () => {
   const clerk = useClerk();
   const { isSignedIn } = useAuth();
   const pathname = usePathname();
+
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const closeSidebar = () => {
+    if (isMobile) setOpenMobile(false);
+  };
   return (
     <SidebarGroup>
       <SidebarGroupLabel>You</SidebarGroupLabel>
@@ -59,6 +67,7 @@ export const PersonalSection = () => {
                   prefetch
                   href={item.url}
                   className="flex items-center gap-4"
+                  onClick={closeSidebar}
                 >
                   <item.icon />
                   <span className="text-sm">{item.title}</span>

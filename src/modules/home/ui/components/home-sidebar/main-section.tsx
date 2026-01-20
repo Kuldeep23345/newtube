@@ -75,6 +75,7 @@ export const MainSection = () => {
                 <Link
                   prefetch
                   href={item.url}
+                  onClick={closeSidebar}
                   className="flex items-center gap-4"
                 >
                   <item.icon />
