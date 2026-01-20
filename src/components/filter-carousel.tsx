@@ -43,26 +43,22 @@ export const FilterCarousel = ({
 
   return (
     <div className="relative w-full">
-      {/* LEFT FADE — mobile + desktop */}
-      <div
-        className={cn(
-          "absolute inset-y-0 left-0 w-6 md:w-10 z-10 pointer-events-none",
-          "bg-linear-to-r from-white to-transparent",
-          current === 1 && "hidden"
-        )}
-      />
-
       <Carousel
         setApi={setApi}
-        opts={{
-          align: "start",
-          dragFree: true,
-        }}
-        /* −8px horizontal padding on mobile */
+        opts={{ align: "start", dragFree: true }}
         className="relative w-full px-1 md:px-12"
       >
+        {/* LEFT FADE */}
+        <div
+          className={cn(
+            "absolute inset-y-0 z-20 pointer-events-none",
+            "left-0 md:left-12 w-6 md:w-10",
+            "bg-linear-to-r from-white to-transparent",
+            current === 1 && "hidden"
+          )}
+        />
+
         <CarouselContent className="-ml-2 md:-ml-3">
-          {/* ALL */}
           {!isLoading && (
             <CarouselItem
               className="pl-2 md:pl-3 basis-auto"
@@ -77,7 +73,6 @@ export const FilterCarousel = ({
             </CarouselItem>
           )}
 
-          {/* LOADING */}
           {isLoading &&
             Array.from({ length: 10 }).map((_, index) => (
               <CarouselItem
@@ -88,7 +83,6 @@ export const FilterCarousel = ({
               </CarouselItem>
             ))}
 
-          {/* DATA */}
           {!isLoading &&
             data.map((item) => (
               <CarouselItem
@@ -106,19 +100,20 @@ export const FilterCarousel = ({
             ))}
         </CarouselContent>
 
-        {/* ARROWS — desktop only */}
-        <CarouselPrevious className="hidden md:flex left-0 z-20" />
-        <CarouselNext className="hidden md:flex right-0 z-20" />
-      </Carousel>
+        {/* RIGHT FADE */}
+        <div
+          className={cn(
+            "absolute inset-y-0 z-20 pointer-events-none",
+            "right-0 md:right-12 w-6 md:w-10",
+            "bg-linear-to-l from-white to-transparent",
+            current === count && "hidden"
+          )}
+        />
 
-      {/* RIGHT FADE — mobile + desktop */}
-      <div
-        className={cn(
-          "absolute inset-y-0 right-0 w-6 md:w-10 z-10 pointer-events-none",
-          "bg-linear-to-l from-white to-transparent",
-          current === count && "hidden"
-        )}
-      />
+        {/* ARROWS */}
+        <CarouselPrevious className="hidden md:flex left-0 z-30" />
+        <CarouselNext className="hidden md:flex right-0 z-30" />
+      </Carousel>
     </div>
   );
 };

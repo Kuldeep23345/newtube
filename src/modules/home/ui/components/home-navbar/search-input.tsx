@@ -1,21 +1,38 @@
 "use client";
-import { Button } from "@/components/ui/button";
 
+import { Button } from "@/components/ui/button";
 import { SearchIcon, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const SearchInput = () => {
+interface SearchInputProps {
+  autoFocus?: boolean;
+  onSubmitComplete?: () => void;
+}
+
+export const SearchInput = ({
+  autoFocus,
+  onSubmitComplete,
+}: SearchInputProps) => {
   return (
     <Suspense fallback={<Skeleton className="h-10 w-full" />}>
-      <SearchInputSuspense />
+      <SearchInputSuspense
+        autoFocus={autoFocus}
+        onSubmitComplete={onSubmitComplete}
+      />
     </Suspense>
   );
 };
 
-const SearchInputSuspense = () => {
+const SearchInputSuspense = ({
+  autoFocus,
+  onSubmitComplete,
+}: {
+  autoFocus?: boolean;
+  onSubmitComplete?: () => void;
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get("query") || "";
@@ -24,12 +41,13 @@ const SearchInputSuspense = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     const newQuery = value.trim();
+    if (!newQuery) return;
+
     const params = new URLSearchParams();
 
-    if (newQuery) {
-      params.set("query", newQuery);
-    }
+    params.set("query", newQuery);
 
     if (categoryId) {
       params.set("categoryId", categoryId);
@@ -37,6 +55,9 @@ const SearchInputSuspense = () => {
 
     setValue(newQuery);
     router.push(`/search?${params.toString()}`);
+
+    // ✅ CLOSE MOBILE SEARCH PANEL
+    onSubmitComplete?.();
   };
 
   return (
@@ -46,20 +67,23 @@ const SearchInputSuspense = () => {
           type="text"
           placeholder="Search"
           value={value}
+          autoFocus={autoFocus}
           onChange={(e) => setValue(e.target.value)}
           className="w-full pl-4 py-2 pr-12 rounded-l-full border focus:outline-none focus:border-blue-500"
         />
+
         {value && (
           <Button
             type="button"
             variant="ghost"
             onClick={() => setValue("")}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full"
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full"
           >
             <XIcon className="text-gray-500" />
           </Button>
         )}
       </div>
+
       <button
         disabled={!value.trim()}
         type="submit"

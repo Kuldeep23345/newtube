@@ -47,17 +47,7 @@ export const MainSection = () => {
 
   return (
     <SidebarGroup>
-      <SidebarHeader className="flex items-start justify-center mb-2.5 md:hidden">
-        <Link
-          href="/"
-          className="flex items-center gap-2"
-          onClick={closeSidebar}
-        >
-          <Image src="/logo.svg" alt="Logo" width={28} height={28} />
-          <span className="text-md font-medium tracking-tight">NewTube</span>
-        </Link>
-      </SidebarHeader>
-      <SidebarGroupContent>
+      <SidebarGroupContent className="pt-10">
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
