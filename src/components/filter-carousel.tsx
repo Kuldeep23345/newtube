@@ -31,9 +31,8 @@ export const FilterCarousel = ({
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (!api) {
-      return;
-    }
+    if (!api) return;
+
     setCount(api.scrollSnapList().length);
     setCurrent(api.selectedScrollSnap() + 1);
 
@@ -44,10 +43,11 @@ export const FilterCarousel = ({
 
   return (
     <div className="relative w-full">
-      {/* left fade */}
+      {/* LEFT FADE — mobile + desktop */}
       <div
         className={cn(
-          "absolute left-12 top-0 bottom-0 w-12 z-10 bg-linear-to-r from-white to-transparent pointer-events-none",
+          "absolute inset-y-0 left-0 w-6 md:w-10 z-10 pointer-events-none",
+          "bg-linear-to-r from-white to-transparent",
           current === 1 && "hidden"
         )}
       />
@@ -58,54 +58,64 @@ export const FilterCarousel = ({
           align: "start",
           dragFree: true,
         }}
-        className="w-full px-12"
+        /* −8px horizontal padding on mobile */
+        className="relative w-full px-1 md:px-12"
       >
-        <CarouselContent className="-ml-3">
+        <CarouselContent className="-ml-2 md:-ml-3">
+          {/* ALL */}
           {!isLoading && (
             <CarouselItem
-              className="pl-3 basis-auto"
+              className="pl-2 md:pl-3 basis-auto"
               onClick={() => onSelect(null)}
             >
               <Badge
                 variant={!value ? "default" : "secondary"}
-                className=" rounded-lg px-3 py-1 cursor-pointer whitespace-nowrap text-sm"
+                className="rounded-lg px-3 py-1 cursor-pointer whitespace-nowrap text-sm"
               >
                 All
               </Badge>
             </CarouselItem>
           )}
 
+          {/* LOADING */}
           {isLoading &&
-            Array.from({ length: 14 }).map((_, index) => (
-              <CarouselItem className="pl-3 basis-auto" key={index}>
-                <Skeleton className="rounded-lg px-3 py-1 h-full text-sm w-25 font-semibold">
-                  &nbsp;
-                </Skeleton>
+            Array.from({ length: 10 }).map((_, index) => (
+              <CarouselItem
+                key={index}
+                className="pl-2 md:pl-3 basis-auto"
+              >
+                <Skeleton className="rounded-lg h-7 w-24" />
               </CarouselItem>
             ))}
+
+          {/* DATA */}
           {!isLoading &&
             data.map((item) => (
               <CarouselItem
-                className="pl-3 basis-auto"
                 key={item.value}
+                className="pl-2 md:pl-3 basis-auto"
                 onClick={() => onSelect(item.value)}
               >
                 <Badge
                   variant={value === item.value ? "default" : "secondary"}
-                  className=" rounded-lg px-3 py-1 cursor-pointer whitespace-nowrap text-sm"
+                  className="rounded-lg px-3 py-1 cursor-pointer whitespace-nowrap text-sm"
                 >
                   {item.label}
                 </Badge>
               </CarouselItem>
             ))}
         </CarouselContent>
-        <CarouselPrevious className="left-0 z-20" />
-        <CarouselNext className="right-0 z-20" />
+
+        {/* ARROWS — desktop only */}
+        <CarouselPrevious className="hidden md:flex left-0 z-20" />
+        <CarouselNext className="hidden md:flex right-0 z-20" />
       </Carousel>
-      {/* right fade */}
+
+      {/* RIGHT FADE — mobile + desktop */}
       <div
         className={cn(
-          "absolute right-12 top-0 bottom-0 w-12 z-10 bg-linear-to-l from-white to-transparent pointer-events-none",
+          "absolute inset-y-0 right-0 w-6 md:w-10 z-10 pointer-events-none",
+          "bg-linear-to-l from-white to-transparent",
           current === count && "hidden"
         )}
       />
