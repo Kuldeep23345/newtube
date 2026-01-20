@@ -3,13 +3,16 @@
 import {
   SidebarGroup,
   SidebarGroupContent,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@clerk/clerk-react";
 import { useClerk } from "@clerk/nextjs";
 import { FlameIcon, HomeIcon, PlaySquareIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 const items = [
@@ -36,9 +39,24 @@ export const MainSection = () => {
   const clerk = useClerk();
   const { isSignedIn } = useAuth();
   const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const closeSidebar = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   return (
     <SidebarGroup>
+      <SidebarHeader className="flex items-start justify-center mb-2.5 md:hidden">
+        <Link
+          href="/"
+          className="flex items-center gap-2"
+          onClick={closeSidebar}
+        >
+          <Image src="/logo.svg" alt="Logo" width={28} height={28} />
+          <span className="text-md font-medium tracking-tight">NewTube</span>
+        </Link>
+      </SidebarHeader>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
