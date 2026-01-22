@@ -14,8 +14,11 @@ export const VideoView = ({ videoId }: VideoViewProps) => {
           <VideoSection videoId={videoId} />
           <div className="xl:hidden block mt-4">
             <CommentsSection videoId={videoId} />
+            <SuggestionsSection videoId={videoId} isManual />
           </div>
-          <SuggestionsSection videoId={videoId} isManual />
+          <div className="hidden xl:block">
+            <CommentsSection videoId={videoId} />
+          </div>
         </div>
         <div className="hidden xl:block w-full xl:w-95 2xl:w-115 shrink">
           <SuggestionsSection videoId={videoId} />
