@@ -143,7 +143,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
       toast.success("Video updated");
     },
     onError: () => {
-      toast.error("Something went wrong");
+      toast.error("Video updating failed");
     },
   });
   const remove = trpc.videos.remove.useMutation({
@@ -153,7 +153,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
       router.push("/studio");
     },
     onError: () => {
-      toast.error("Something went wrong");
+      toast.error("Video removing failed");
     },
   });
   const revalidate = trpc.videos.revalidate.useMutation({
@@ -163,27 +163,27 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
       toast.success("Video revalidated");
     },
     onError: () => {
-      toast.error("Something went wrong");
+      toast.error("Video revalidating failed");
     },
   });
   const generateTitle = trpc.videos.generateTitle.useMutation({
     onSuccess: () => {
-      toast.success("Background job started", {
+      toast.success("Title generating started", {
         description: "This may take a few minutes.",
       });
     },
     onError: () => {
-      toast.error("Something went wrong");
+      toast.error("Title generating failed");
     },
   });
   const generateDescription = trpc.videos.generateDescription.useMutation({
     onSuccess: () => {
-      toast.success("Background job started", {
+      toast.success("Description generating started", {
         description: "This may take a few minutes.",
       });
     },
     onError: () => {
-      toast.error("Something went wrong");
+      toast.error("Description generating failed");
     },
   });
 
@@ -194,7 +194,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
       toast.success("Thumbnail restored");
     },
     onError: () => {
-      toast.error("Something went wrong");
+      toast.error("Thumbnail restoring failed");
     },
   });
 
