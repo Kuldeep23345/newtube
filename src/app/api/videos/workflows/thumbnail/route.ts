@@ -12,7 +12,7 @@ interface InputType {
 export const { POST } = serve(async (context) => {
   const { userId, videoId, prompt } = context.requestPayload as InputType;
 
-  /* ---------------------------- GET VIDEO ---------------------------- */
+
   const video = await context.run("get-video", async () => {
     const result = await db
       .select()
@@ -26,7 +26,7 @@ export const { POST } = serve(async (context) => {
     return result[0];
   });
 
-  /* ----------------------- GENERATE THUMBNAIL ------------------------ */
+  
   const thumbnailUrl = await context.run("generate-thumbnail", async () => {
     const enhancedPrompt = `
 YouTube thumbnail, ultra high quality, cinematic lighting,
@@ -44,7 +44,7 @@ Prompt: ${prompt}
       body: JSON.stringify({
         model: "stabilityai/stable-diffusion-xl-base-1.0",
         prompt: enhancedPrompt,
-        size: "1280x720", // YouTube thumbnail size
+        size: "1280x720", 
       }),
     });
 
